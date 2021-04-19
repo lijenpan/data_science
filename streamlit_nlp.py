@@ -1,6 +1,7 @@
 from collections import Counter
 from heapq import nlargest
 
+import numpy as np
 import streamlit as st
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
@@ -107,9 +108,13 @@ elif option == 'Text Summarization':
 elif option == "Aspect Based Sentiment Analysis":
     if aspect1 and aspect2:
         nlp = absa.load()
-        a1, a2 = nlp(text, aspects=[aspect1, aspect2])
+        a1, a2 = nlp(text, aspects=[aspect1, aspect2]).examples
         st.subheader("Summary")
-        st.write(aspect1 + " Sentiment:\t" + str(a1.sentiment))
-        st.write(aspect2 + " Sentiment:\t" + str(a2.sentiment))
+        a1_rounded_scores = np.round(a1.scores, decimals=3)
+        a2_rounded_scores = np.round(a2.scores, decimals=3)
+        st.write(f'{str(a1.sentiment)} for "{a1.aspect}"')
+        st.write(f'Scores (neutral/negative/positive): {a1_rounded_scores}')
+        st.write(f'{str(a2.sentiment)} for "{a2.aspect}"')
+        st.write(f'Scores (neutral/negative/positive): {a2_rounded_scores}')
     else:
         st.write("Please enter aspect based sentiment analysis parameters.")

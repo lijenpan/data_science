@@ -1,0 +1,7 @@
+streamlit==0.80.0
+spacy==3.0.5
+textblob==0.15.3
+nltk==3.6.1
+torch==1.8.1
+torch-transformers=1.0.4
+aspect-based-sentiment-analysis==2.0.2

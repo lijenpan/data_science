@@ -105,8 +105,11 @@ elif option == 'Text Summarization':
     st.subheader("Summary")
     st.write(summary)
 elif option == "Aspect Based Sentiment Analysis":
-    nlp = absa.load()
-    a1, a2 = nlp(text, aspects=[aspect1, aspect2])
-    st.subheader("Summary")
-    st.write(aspect1 + " Sentiment:\t" + str(a1.sentiment))
-    st.write(aspect2 + " Sentiment:\t" + str(a2.sentiment))
+    if aspect1 and aspect2:
+        nlp = absa.load()
+        a1, a2 = nlp(text, aspects=[aspect1, aspect2])
+        st.subheader("Summary")
+        st.write(aspect1 + " Sentiment:\t" + str(a1.sentiment))
+        st.write(aspect2 + " Sentiment:\t" + str(a2.sentiment))
+    else:
+        st.write("Please enter aspect based sentiment analysis parameters.")

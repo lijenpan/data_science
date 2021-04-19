@@ -3,6 +3,7 @@ from heapq import nlargest
 
 import numpy as np
 import streamlit as st
+from streamlit import components
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
@@ -22,7 +23,7 @@ option = st.selectbox("NLP Service", ("Sentiment Analysis", "Entity Extraction",
 
 # Textbox for user input
 st.subheader("Enter the text you would like to analyze.")
-text = st.text_input("Enter text")
+text = st.text_area("Enter text")
 
 if option == "Aspect Based Sentiment Analysis":
     aspect1 = st.text_input("First aspect")
@@ -106,15 +107,20 @@ elif option == 'Text Summarization':
     st.subheader("Summary")
     st.write(summary)
 elif option == "Aspect Based Sentiment Analysis":
-    if aspect1 and aspect2:
-        nlp = absa.load()
+    if text and aspect1 and aspect2:
+        recognizer = absa.aux_models.BasicPatternRecognizer()
+        nlp = absa.load(pattern_recognizer=recognizer)
         a1, a2 = nlp(text, aspects=[aspect1, aspect2]).examples
         st.subheader("Summary")
         a1_rounded_scores = np.round(a1.scores, decimals=3)
         a2_rounded_scores = np.round(a2.scores, decimals=3)
         st.write(f'{str(a1.sentiment)} for "{a1.aspect}"')
         st.write(f'Scores (neutral/negative/positive): {a1_rounded_scores}')
+        if a1.review.patterns is not None:
+            components.v1.html(absa.plots.display_html(a1.review.patterns)._repr_html_())
         st.write(f'{str(a2.sentiment)} for "{a2.aspect}"')
         st.write(f'Scores (neutral/negative/positive): {a2_rounded_scores}')
+        if a2.review.patterns is not None:
+            components.v1.html(absa.plots.display_html(a2.review.patterns)._repr_html_())
     else:
         st.write("Please enter aspect based sentiment analysis parameters.")

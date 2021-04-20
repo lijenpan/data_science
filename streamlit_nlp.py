@@ -119,20 +119,22 @@ def aspect_based_sentiment_analysis(text, aspect1, aspect2):
 def main():
     # Heading for the app
     st.title("Natural Language Processing Web Application")
-    st.subheader("What type of NLP service would you like to use?")
+    st.subheader("")
+    # Input Option
+    data_input_method = st.sidebar.radio("Select Data Input Method", ("Copy-Paste Text", "Upload a CSV File"))
+    text = ''
+    if data_input_method == "Copy-Paste Text":
+        st.subheader("Enter the text you would like to analyze.")
+        text = st.text_area("Enter text")
+    elif data_input_method == "Upload a CSV File":
+        user_files = st.file_uploader("Choose a file", type=["txt", "csv"], accept_multiple_files=True, key="file_uploader")
+        for file in user_files:
+            text = file.read().decode("utf-8")
+            file.seek(0)
 
     # Picking what NLP task you want to do
-    option = st.selectbox("NLP Service", ("Sentiment Analysis", "Entity Extraction", "Text Summarization",
-                                          "Aspect Based Sentiment Analysis", "Topic Modeling"))
-
-    # Textbox for user input
-    st.subheader("Enter the text you would like to analyze.")
-    text = st.text_area("Enter text")
-    user_files = st.file_uploader("Choose a file", type=["txt", "csv"], accept_multiple_files=True, key="file_uploader")
-    for file in user_files:
-        text = file.read().decode("utf-8")
-        file.seek(0)
-
+    option = st.sidebar.radio("Select a NLP Service", ("Sentiment Analysis", "Entity Extraction", "Text Summarization",
+                                                       "Aspect Based Sentiment Analysis", "Topic Modeling"))
     if option == "Aspect Based Sentiment Analysis":
         aspect1 = st.text_input("First aspect")
         aspect2 = st.text_input("Second aspect")

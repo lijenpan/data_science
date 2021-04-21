@@ -1,3 +1,4 @@
+import re
 from collections import Counter
 from heapq import nlargest
 
@@ -9,6 +10,7 @@ from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
 from textblob import TextBlob
 from nltk.tokenize import sent_tokenize
+import nltk
 import aspect_based_sentiment_analysis as absa
 
 nlp = spacy.load("en_core_web_sm")
@@ -60,7 +62,7 @@ def entity_extraction(text):
         st.write("GPE Entities:\t" + str(ent_gpe))
 
 
-def text_summarization(text):
+def text_summarization_spacy(text):
     # Text summarization is no longer available in gensim 4.x.
     # So let's try spacy's implementation.
     if text:
@@ -92,8 +94,51 @@ def text_summarization(text):
         final_sentences = [w.text for w in summarized_sentences]
         summary = ' '.join(final_sentences)
 
-        st.subheader("Summary")
+        st.subheader("Summary by spaCy")
         st.write(summary)
+        st.write(f'{round((1 - len(summary) / len(text)) * 100, 2)}% shorter than the original text.')
+
+
+def text_summarization_nltk(text):
+    # Removing Square Brackets and Extra Spaces
+    # formatted_text = re.sub(r'[[0-9]*]', ' ', text)
+    # formatted_text = re.sub(r's+', ' ', formatted_text)
+    # # Removing special characters and digits
+    # formatted_text = re.sub('[^a-zA-Z]', ' ', formatted_text)
+    # formatted_text = re.sub(r's+', ' ', formatted_text)
+
+    sentence_list = sent_tokenize(text)
+
+    stopwords = nltk.corpus.stopwords.words('english')
+    word_frequencies = {}
+    for word in nltk.word_tokenize(text):
+        if word not in stopwords:
+            if word not in word_frequencies.keys():
+                word_frequencies[word] = 1
+            else:
+                word_frequencies[word] += 1
+
+    maximum_frequency = max(word_frequencies.values())
+
+    sentence_scores = {}
+    for sent in sentence_list:
+        for word in nltk.word_tokenize(sent.lower()):
+            if word in word_frequencies.keys():
+                if len(sent.split(' ')) < 30:
+                    if sent not in sentence_scores.keys():
+                        sentence_scores[sent] = word_frequencies[word]
+                    else:
+                        sentence_scores[sent] += word_frequencies[word]
+
+    summary_sentences = nlargest(7, sentence_scores, key=sentence_scores.get)
+    summary = ' '.join(summary_sentences)
+
+    for word in word_frequencies.keys():
+        word_frequencies[word] = (word_frequencies[word] / maximum_frequency)
+
+    st.subheader("Summary by NLTK")
+    st.write(summary)
+    st.write(f'{round((1 - len(summary) / len(text)) * 100, 2)}% shorter than the original text.')
 
 
 def aspect_based_sentiment_analysis(text, aspect1, aspect2):

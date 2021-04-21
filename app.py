@@ -8,7 +8,8 @@ import lda as LDA
 import base64
 from pathlib import Path
 
-from streamlit_nlp import sentiment_analysis, entity_extraction, text_summarization, aspect_based_sentiment_analysis
+from streamlit_nlp import sentiment_analysis, entity_extraction, text_summarization_spacy, text_summarization_nltk,\
+    aspect_based_sentiment_analysis
 
 
 def check_input_method(data_input_mthd):
@@ -151,7 +152,8 @@ elif option == 'Entity Extraction':
     entity_extraction(text)
 elif option == 'Text Summarization':
     space_header()
-    text_summarization(text)
+    text_summarization_spacy(text)
+    text_summarization_nltk(text)
 elif option == "Aspect Based Sentiment Analysis":
     space_header()
     aspect1 = st.text_input("First aspect")

@@ -7,4 +7,4 @@ algorithms:
 - Entity Extraction
 - Text Summarization
 - Aspect Based Sentiment Analysis
-- Topic Modeling (coming soon)
+- Topic Modeling

@@ -11,7 +11,7 @@ from wordcloud import WordCloud
 import PyPDF2
 import streamlit as st
 
-from preprocessor import stop_words
+from topic_models.preprocessor import stop_words
 
 ######## chart paths creation ###############
 chart1_path = Path.cwd().joinpath('chart1.pdf')
@@ -23,7 +23,6 @@ chart_path = Path.cwd().joinpath('chart.pdf')
 def del_charts():
     """
     function delete charts after downloaded
-
     """
     charts_list = [chart1_path, chart2_path, chart3_path, chart_path]
     for chart in charts_list:

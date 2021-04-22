@@ -1,5 +1,6 @@
 from collections import Counter
 from heapq import nlargest
+import sys
 
 import numpy as np
 import streamlit as st
@@ -61,38 +62,44 @@ def entity_extraction(text):
         st.write("GPE Entities:\t" + str(ent_gpe))
 
 
+@st.cache(suppress_st_warning=True)
+def spacy_summary(text):
+    st.write(f"WARN: CACHE MISS FOR {sys._getframe().f_code.co_name}")
+    doc = nlp(text)
+    keyword = []
+    stopwords = list(STOP_WORDS)
+    pos_tag = ['PROPN', 'ADJ', 'NOUN', 'VERB']
+    for token in doc:
+        if token.text in stopwords or token.text in punctuation:
+            continue
+        if token.pos_ in pos_tag:
+            keyword.append(token.text)
+
+    freq_word = Counter(keyword)
+    max_freq = Counter(keyword).most_common(1)[0][1]
+    for word in freq_word.keys():
+        freq_word[word] = (freq_word[word] / max_freq)
+
+    sent_strength = {}
+    for sent in doc.sents:
+        for word in sent:
+            if word.text in freq_word.keys():
+                if sent in sent_strength.keys():
+                    sent_strength[sent] += freq_word[word.text]
+                else:
+                    sent_strength[sent] = freq_word[word.text]
+
+    summarized_sentences = nlargest(3, sent_strength, key=sent_strength.get)
+    final_sentences = [w.text for w in summarized_sentences]
+    summary = ' '.join(final_sentences)
+    return summary
+
+
 def text_summarization_spacy(text):
     # Text summarization is no longer available in gensim 4.x.
     # So let's try spacy's implementation.
     if text:
-        doc = nlp(text)
-        keyword = []
-        stopwords = list(STOP_WORDS)
-        pos_tag = ['PROPN', 'ADJ', 'NOUN', 'VERB']
-        for token in doc:
-            if token.text in stopwords or token.text in punctuation:
-                continue
-            if token.pos_ in pos_tag:
-                keyword.append(token.text)
-
-        freq_word = Counter(keyword)
-        max_freq = Counter(keyword).most_common(1)[0][1]
-        for word in freq_word.keys():
-            freq_word[word] = (freq_word[word] / max_freq)
-
-        sent_strength = {}
-        for sent in doc.sents:
-            for word in sent:
-                if word.text in freq_word.keys():
-                    if sent in sent_strength.keys():
-                        sent_strength[sent] += freq_word[word.text]
-                    else:
-                        sent_strength[sent] = freq_word[word.text]
-
-        summarized_sentences = nlargest(3, sent_strength, key=sent_strength.get)
-        final_sentences = [w.text for w in summarized_sentences]
-        summary = ' '.join(final_sentences)
-
+        summary = spacy_summary(text)
         st.subheader("Summary by spaCy")
         st.write(summary)
         st.write(f'{round((1 - len(summary) / len(text)) * 100, 2)}% shorter than the original text.')
